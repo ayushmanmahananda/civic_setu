@@ -1,47 +1,14 @@
 import "leaflet/dist/leaflet.css";
 import { useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import LocationMarker from "./LocationMarker";
+import IssueForm from "./IssueForm";
 
-const issues = [
-  {
-    id: 1,
-    type: "Pothole",
-    lat: 13.5549,
-    lng: 80.0272,
-    description: "Big pothole near the main gate",
-  },
-  {
-    id: 2,
-    type: "blocked drain",
-    lat: 10.5549,
-    lng: 78.0272,
-    description: "Drain blocked near the street light",
-  },
-  {
-    id: 3,
-    type: "broken street light",
-    lat: 15.5549,
-    lng: 79.0272,
-    description: "Street light not working of lane 4",
-  },
-];
+function Map(props) {
+  const [issues, setIssues] = useState([]);
 
-function MapClickHandler() {
-  useMapEvents({
-    click(e) {
-      console.log("Map clicked at ", e.latlng);
-    },
-  });
-  return null;
-}
+  const [selectedLocation, setSelectedLocation] = useState({});
 
-function Map() {
   return (
     <>
       <MapContainer
@@ -51,18 +18,33 @@ function Map() {
         style={{ height: "90vh", width: "50%" }}
       >
         <TileLayer
-  attribution="&copy; OpenStreetMap contributors"
-  url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-/>
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+        />
 
         {issues.map((issue) => (
           <Marker key={issue.id} position={[issue.lat, issue.lng]}>
-            <Popup>{issue.description}</Popup>
+            <Popup>
+              <b>{issue.type}</b>
+              <br />
+              {issue.description}
+            </Popup>
           </Marker>
         ))}
 
-        <MapClickHandler />
+        <LocationMarker setSelectedLocation={setSelectedLocation} />
+
+        {selectedLocation?.lat !== undefined && (
+          <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
+            <Popup>New Issue</Popup>
+          </Marker>
+        )}
       </MapContainer>
+      <IssueForm
+        setIssues={setIssues}
+        selectedLocation={selectedLocation}
+        setSelectedLocation={setSelectedLocation}
+      />
     </>
   );
 }
